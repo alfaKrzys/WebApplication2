@@ -9,6 +9,7 @@ namespace WebApplication2.Models
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public int ForemanId { get; set; }
         public virtual Foreman Foreman { get; set; }
     }
 }
