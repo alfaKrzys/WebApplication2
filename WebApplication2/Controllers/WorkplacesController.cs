@@ -20,10 +20,28 @@ namespace WebApplication2.Controllers
         }
 
         // GET: Workplaces
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder)
         {
-            var webApplication2Context = _context.Workplace.Include(w => w.Foreman);
-            return View(await webApplication2Context.ToListAsync());
+            ViewBag.FirstNameSortParm = String.IsNullOrEmpty(sortOrder) ? "first_name_desc" : "";
+            ViewBag.LastNameSortParm = sortOrder == "last_name" ? "last_name_desc" : "last_name";
+            var workplaces = from f in _context.Workplace
+                                         select f;
+            switch (sortOrder)
+            {
+                case "first_name_desc":
+                    workplaces = workplaces.OrderByDescending(s => s.Foreman.FirstName);
+                    break;
+                case "last_name":
+                    workplaces = workplaces.OrderBy(s => s.Foreman.LastName);
+                    break;
+                case "last_name_desc":
+                    workplaces = workplaces.OrderByDescending(s => s.Foreman.LastName);
+                    break;
+                default:
+                    workplaces = workplaces.OrderBy(s => s.Foreman.FirstName);
+                    break;
+            }
+            return View(await workplaces.Include(f => f.Foreman).ToListAsync());
         }
 
         // GET: Workplaces/Details/5
@@ -48,7 +66,7 @@ namespace WebApplication2.Controllers
         // GET: Workplaces/Create
         public IActionResult Create()
         {
-            ViewData["ForemanId"] = new SelectList(_context.Foreman, "Id", "Id");
+            ViewData["ForemanId"] = new SelectList(_context.Foreman, "Id", "Name");
             return View();
         }
 
@@ -82,7 +100,7 @@ namespace WebApplication2.Controllers
             {
                 return NotFound();
             }
-            ViewData["ForemanId"] = new SelectList(_context.Foreman, "Id", "Id", workplace.ForemanId);
+            ViewData["ForemanId"] = new SelectList(_context.Foreman, "Id", "Name", workplace.ForemanId);
             return View(workplace);
         }
 
